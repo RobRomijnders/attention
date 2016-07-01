@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Attention by RobRomijnders</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Attention</h1>
+        <p>An elementary example of soft attention</p>
+
+        <p class="view"><a href="https://github.com/RobRomijnders/attention">View the Project on GitHub <small>RobRomijnders/attention</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/RobRomijnders/attention/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/RobRomijnders/attention/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/RobRomijnders/attention">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a id="attention" class="anchor" href="#attention" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Attention</h2>
+
+<p>If you, like me, are fascinated by the new developments in soft/hard attention. But you struggle to understand the exact mechanism. This post explains exactly that.</p>
+
+<p>In this post we implement the basic soft attention. We run softmax with a dataset derived from MNIST. Soft attention is a complicated subject. Fortunately, MNIST digits are easy to understand and a good introduction.</p>
+
+<h2>
+<a id="soft-attention" class="anchor" href="#soft-attention" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Soft attention</h2>
+
+<p>Soft attention originates from the captioning problem. In image captioning concerns with generating captions for images. Typical examples are shown below. </p>
+
+<p>In such model, a CNN converts an image to a lower dimensional representation. This representation inputs into another network, typically a LSTM, which will generate natural language. In this pipeline, the LSTM receives representation of the image only once. We humans tend to look twice or more at an image while we describe the concent. The soft attention models exactly that. Every time-step, the LSTM outputs natural language to caption the image. For soft-attention, it also outputs a key, by which it attends to a part of the image. This information feeds in as input to the next time-step.</p>
+
+<h2>
+<a id="stripped-down" class="anchor" href="#stripped-down" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stripped down</h2>
+
+<p>It might be hard to think how an LSTM takes a latent representation of an image to generate natural language. Therefore, this elementary model simply strips that part. Engineers typically struggle how to feed the representation, is it an input, a hidden state, a memory state ... We will not bother such complicated questions</p>
+
+<h2>
+<a id="pipeline" class="anchor" href="#pipeline" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pipeline</h2>
+
+<p>The pipeline goes as follows. MNIST digits are handwritten digits 0,1,2 to 9. Typical convolutional neural networks manae to classify these above human accuracy. The activations of the first layer of such networks corresponds to an activation volume. After a convolutional layer and a max-pooling layer, the activation maps span 14 by 14 pixels. A layer typically consists of many neurons, in our case 12. The activation volume thus spans a Tensor of shape [14,14,12]</p>
+
+<p>The LSTM outputs a key to attend to this activation volume. Researchers have been using three techniques to relate the key and the volume</p>
+
+<ul>
+<li>The key is <strong>a heat map</strong> for the locations it attends to. This output key spans <strong>[14,14]</strong>, gets squashed by softmax and multiplies each channel</li>
+<li>The key <strong>parametrizes a 2D Gaussian</strong>. The output key spans <strong>[5,]</strong> that paramtrize the mean and variances in x1 and x2 and a correlation coefficient, rho.</li>
+<li>The key is <strong>a feature-like vector</strong> that indicates which features it atends to. This output key spans <strong>[12,]</strong>. An inner-product compares this vector to every other vector in the activation map. This results in a heat map, gets squashed by Softmax and multiplies each channel, like in the first option.</li>
+</ul>
+
+<p>The Github repo demonstrates all three approaches. Respectively attention_main_sm.py, attention_main_gaussian.py and attention_main.py. </p>
+
+<p>For the final option, with the feature-like vector, the next section displays results.</p>
+
+<h2>
+<a id="results" class="anchor" href="#results" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Results</h2>
+
+<p>TODO include results section</p>
+
+<h2>
+<a id="improvements" class="anchor" href="#improvements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Improvements</h2>
+
+<p>As we display an elementary example, there's many room for improvements. Some of which are</p>
+
+<ul>
+<li>
+<strong>Temperature of softmax</strong> For some applications, you might restrict the regions that the soft-attention can attend to. Lowering the temperature of the Softmax does exactly that</li>
+<li>
+<strong>Feeding initial states</strong> Many, if not all, of the soft-attentions initialize the hidden state and memory state of the LSTM with some representation</li>
+<li>
+<strong>Combine approaches for attending</strong> We discussed pipelines for the output key to attend to the activation volume. Such approaches also allow for combination. You might want to have a feature-like key and also a heatmap for the locations, and so on</li>
+</ul>
+
+<p>As always, I am curious to any comments and questions. Reach me at <a href="mailto:romijndersrob@gmail.com">romijndersrob@gmail.com</a></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/RobRomijnders">RobRomijnders</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
