@@ -192,7 +192,7 @@ batch_ind_test = np.random.choice(Ntest,batch_size,replace=False)
 masks_fetch = sess.run(masks, feed_dict={ x: F_test[batch_ind_test], y_: y_test[batch_ind_test], keep_prob: 1.0})
 
 
-ind = 6   #Which index to visualize
+ind = 11   #Which index to visualize
 assert ind < batch_size,'Please provide an index within the batch_size'
 bind = batch_ind_test[ind]
 fig, axes = plt.subplots(nrows=3, ncols=4)
