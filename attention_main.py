@@ -7,16 +7,23 @@ Created on Sunday June 26
 
 """
 import sys
-sys.path.append('/home/rob/Dropbox/ml_projects/attention')
-sys.path.append('/home/rob/Dropbox/ml_projects/FCN/')
+import socket
+if 'rob-laptop' in socket.gethostname():
+  sys.path.append('/home/rob/Dropbox/ml_projects/attention')
+  sys.path.append('/home/rob/Dropbox/ml_projects/FCN/')
+  direc = '/home/rob/Dropbox/ml_projects/FCN/'
+  tb_write = '/home/rob/Dropbox/ml_projects/attention/log_tb'
+elif 'rob-com' in socket.gethostname():
+  sys.path.append('/home/rob/Documents/attention')
+  direc = '/home/rob/Documents/attention/data/'
+  tb_write = '/home/rob/Documents/attention/log_tb'
+
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import clip_ops
 import sklearn as sk
-from tensorflow.models.rnn import rnn_cell
-from tensorflow.models.rnn import rnn
 
 from mpl_toolkits.mplot3d import axes3d
 
@@ -25,7 +32,6 @@ from mpl_toolkits.mplot3d import axes3d
 #X_ is expected to be in [number_samples, 784]
 #y_ is expected to be in [number_samples,]
 
-direc = '/home/rob/Dropbox/ml_projects/FCN/'
 X_test = np.loadtxt(direc+'X_test.csv', delimiter=',')
 y_test = np.loadtxt(direc+'y_test.csv', delimiter=',')
 X_train = np.loadtxt(direc+'X_train.csv', delimiter=',')
@@ -40,7 +46,7 @@ print('Data is loaded')
 """Hyperparameters"""
 hidden_size = H*W      #Number of hidden units in LSTM
 num_layers = 2
-max_iterations = 10000
+max_iterations = 40000
 batch_size = 64
 dropout = 0.8         #Dropout rate in the fully connected layer
 learning_rate = .005
@@ -68,9 +74,9 @@ with tf.name_scope("Placeholders") as scope:
   keep_prob = tf.placeholder("float")
 
 with tf.name_scope("LSTM") as scope:
-  cell = rnn_cell.LSTMCell(hidden_size)
-  cell = rnn_cell.MultiRNNCell([cell] * num_layers)
-  cell = rnn_cell.DropoutWrapper(cell,output_keep_prob=keep_prob)
+  cell = tf.nn.rnn_cell.LSTMCell(hidden_size)
+  cell = tf.nn.rnn_cell.MultiRNNCell([cell] * num_layers)
+  cell = tf.nn.rnn_cell.DropoutWrapper(cell,output_keep_prob=keep_prob)
   #XW_plus_b
   W_a = tf.Variable(tf.random_normal([hidden_size,C], stddev=0.01))
   b_a = tf.Variable(tf.constant(0.5, shape=[C]))
@@ -157,7 +163,7 @@ sess = tf.Session()
 
 #with tf.Session() as sess:
 if True:
-  writer = tf.train.SummaryWriter("/home/rob/Dropbox/ml_projects/attention/log_tb", sess.graph)
+  writer = tf.train.SummaryWriter(tb_write, sess.graph)
 
   sess.run(tf.initialize_all_variables())
 
